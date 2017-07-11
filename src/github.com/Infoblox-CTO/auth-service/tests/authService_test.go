@@ -3,28 +3,12 @@ package authService
 import (
 	"context"
 	"github.com/Infoblox-CTO/auth-service"
+	authstorage "github.com/Infoblox-CTO/auth-service/storage"
 	"testing"
 )
 
-// Should be used only for unit tests
-type InMemoryStorage struct {
-	storage map[string]string
-}
-
-func (storage InMemoryStorage) IsExist(ctx context.Context, credentials authService.UserCredentials) error {
-	password, ok := storage.storage[credentials.UserName]
-	if !ok {
-		return authService.ErrorNotFound
-	}
-
-	if password != credentials.Password {
-		return authService.ErrorUnauthorized
-	}
-	return nil
-}
-
 func TestAuthenticate(t *testing.T) {
-	inMemoryStorage := InMemoryStorage{storage: make(map[string]string)}
+	inMemoryStorage := authstorage.CreateStorage()
 	service := authService.CreateAuthService(inMemoryStorage)
 
 	ResponseErrorUnauthorized := `{"status": ERROR, "result": [], "status_detail" : {"errors": ["Unauthorized"]}}")`
@@ -47,7 +31,8 @@ func TestAuthenticate(t *testing.T) {
 
 	{
 		// User is registered but pwd is wrong
-		inMemoryStorage.storage["Alice"] = "wrong pwd"
+		inMemoryStorage.Register(authService.UserCredentials{UserName: "Alice", Password: "wrong pwd"})
+
 		response, error := service.Authenticate(ctx, credentialsUnderTest)
 		if error != authService.ErrorUnauthorized {
 			t.Errorf("expected error %s but received %s", authService.ErrorUnauthorized, error)
@@ -61,7 +46,7 @@ func TestAuthenticate(t *testing.T) {
 
 	{
 		// User is registered everything is ok
-		inMemoryStorage.storage[credentialsUnderTest.UserName] = credentialsUnderTest.Password
+		inMemoryStorage.Register(credentialsUnderTest)
 		response, error := service.Authenticate(ctx, credentialsUnderTest)
 		if error != nil {
 			t.Errorf("expected no error but received %s", error)

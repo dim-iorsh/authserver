@@ -26,7 +26,7 @@ type AuthService interface {
 	Authenticate(ctx context.Context, credentials UserCredentials) (AuthResponse, error)
 	// Check token. If token is not valid (AuthResponse, error),
 	// otherwise - (AuthResponse, nil)
-	CheckToken(ctx context.Context, token TokenInfo) (AuthResponse, error)
+	//CheckToken(ctx context.Context, token TokenInfo) (AuthResponse, error)
 }
 
 // AuthStorage is a base interface for a storage where user's credentials should be stored.
