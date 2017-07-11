@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package authServiceProto;
+
+// The AuthService service definition.
+service Auth{
+  // Checks user Credentials.
+  rpc Authenticate (AuthRequest) returns (AuthReply) {}
+
+}
+
+// The AuthRequest request contains two parameters.
+message AuthRequest {
+  string userName = 1;
+  string password = 2;
+}
+
+// The auth response contains the result of the authentication.
+message AuthReply {
+  string response = 1;
+}
